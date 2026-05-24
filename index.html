@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国八大菜系 - 交互式图文介绍</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --lu: #C8860A;
+            --chuan: #C0392B;
+            --yue: #E67E22;
+            --su: #27AE60;
+            --min: #8E44AD;
+            --zhe: #2980B9;
+            --xiang: #E74C3C;
+            --hui: #795548;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #0a0a0a;
+            color: #f5f5f5;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 70%);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(200, 134, 10, 0.08) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #f5af19, #f12711);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            color: #aaa;
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .scroll-hint svg {
+            width: 30px;
+            height: 30px;
+            fill: none;
+            stroke: #666;
+            stroke-width: 2;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* Navigation Tabs */
+        .nav-section {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 0;
+        }
+
+        .nav-tabs {
+            display: flex;
+            overflow-x: auto;
+            max-width: 1200px;
+            margin: 0 auto;
+            scrollbar-width: none;
+        }
+
+        .nav-tabs::-webkit-scrollbar { display: none; }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 100px;
+            padding: 1rem 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            color: #888;
+        }
+
+        .nav-tab:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .nav-tab.active {
+            color: #fff;
+            border-bottom-color: var(--tab-color, #f5af19);
+        }
+
+        .nav-tab .tab-icon {
+            font-size: 1.4rem;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Cuisine Section */
+        .cuisine-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .cuisine-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .cuisine-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cuisine-header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--cuisine-color, #333);
+            opacity: 0.08;
+            border-radius: 20px;
+        }
+
+        .cuisine-header h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: 0.5rem;
+            color: var(--cuisine-color, #fff);
+        }
+
+        .cuisine-header .subtitle {
+            font-size: 1.1rem;
+            color: #999;
+            margin-bottom: 0.5rem;
+        }
+
+        .cuisine-header .province {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border: 1px solid var(--cuisine-color, #333);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--cuisine-color, #999);
+            margin-top: 0.5rem;
+        }
+
+        /* Characteristics */
+        .characteristics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .char-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .char-card:hover {
+            background: rgba(255,255,255,0.06);
+            transform: translateY(-4px);
+            border-color: var(--cuisine-color, rgba(255,255,255,0.15));
+        }
+
+        .char-card h4 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--cuisine-color, #999);
+            margin-bottom: 0.75rem;
+        }
+
+        .char-card p {
+            color: #ccc;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tech-tag {
+            padding: 0.3rem 0.8rem;
+            background: rgba(255,255,255,0.06);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #bbb;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Description */
+        .description-section {
+            background: rgba(255,255,255,0.02);
+            border-left: 4px solid var(--cuisine-color, #333);
+            border-radius: 0 16px 16px 0;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            font-size: 1.05rem;
+            line-height: 2;
+            color: #ccc;
+        }
+
+        /* Dishes Grid */
+        .dishes-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #eee;
+        }
+
+        .dishes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .dish-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dish-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--cuisine-color, #333);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .dish-card:hover {
+            background: rgba(255,255,255,0.06);
+            transform: translateY(-4px) scale(1.02);
+            border-color: var(--cuisine-color, rgba(255,255,255,0.15));
+        }
+
+        .dish-card:hover::before {
+            opacity: 1;
+        }
+
+        .dish-card .dish-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: #fff;
+        }
+
+        .dish-card .dish-name-en {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .dish-card .dish-number {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--cuisine-color, #333);
+            opacity: 0.2;
+        }
+
+        /* Overview Grid */
+        .overview-section {
+            padding: 4rem 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .overview-section h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #eee;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .overview-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .overview-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--card-color, #333);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            border-radius: 20px;
+        }
+
+        .overview-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--card-color, rgba(255,255,255,0.2));
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .overview-card:hover::after {
+            opacity: 0.06;
+        }
+
+        .overview-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .overview-card .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .overview-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.3rem;
+            color: var(--card-color, #fff);
+        }
+
+        .overview-card .card-en {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 0.75rem;
+        }
+
+        .overview-card .card-province {
+            font-size: 0.8rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .overview-card .card-flavor {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            color: #555;
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-tab {
+                min-width: 80px;
+                padding: 0.75rem 0.3rem;
+                font-size: 0.8rem;
+            }
+
+            .nav-tab .tab-icon {
+                font-size: 1.2rem;
+            }
+
+            .cuisine-header {
+                padding: 2rem 1rem;
+            }
+
+            .characteristics {
+                grid-template-columns: 1fr;
+            }
+
+            .dishes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .overview-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Transition for section switching */
+        .fade-enter {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .fade-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.4s ease;
+        }
+
+        /* Map Section */
+        .map-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem 0 3rem;
+            position: relative;
+        }
+
+        .china-map {
+            width: 100%;
+            max-width: 700px;
+            height: auto;
+        }
+
+        .map-region {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .map-region:hover {
+            opacity: 1;
+            filter: brightness(1.3);
+        }
+
+        .map-region.active {
+            opacity: 1;
+            filter: brightness(1.2);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #f5af19, #f12711);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Back to top */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+        }
+
+        .back-to-top svg {
+            width: 20px;
+            height: 20px;
+            stroke: #fff;
+            fill: none;
+            stroke-width: 2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Hero -->
+    <section class="hero" id="hero">
+        <h1>中国八大菜系</h1>
+        <p>跨越山川湖海，品味华夏千年饮食文化的精华与智慧</p>
+        <div class="scroll-hint" onclick="scrollToContent()">
+            <svg viewBox="0 0 24 24"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"/></svg>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="nav-section" id="navSection">
+        <div class="nav-tabs" id="navTabs">
+            <div class="nav-tab active" data-cuisine="overview" style="--tab-color: #f5af19">
+                <span class="tab-icon">🗺️</span>
+                <span>总览</span>
+            </div>
+            <div class="nav-tab" data-cuisine="lu" style="--tab-color: var(--lu)">
+                <span class="tab-icon">🏛️</span>
+                <span>鲁菜</span>
+            </div>
+            <div class="nav-tab" data-cuisine="chuan" style="--tab-color: var(--chuan)">
+                <span class="tab-icon">🌶️</span>
+                <span>川菜</span>
+            </div>
+            <div class="nav-tab" data-cuisine="yue" style="--tab-color: var(--yue)">
+                <span class="tab-icon">🦐</span>
+                <span>粤菜</span>
+            </div>
+            <div class="nav-tab" data-cuisine="su" style="--tab-color: var(--su)">
+                <span class="tab-icon">🎋</span>
+                <span>苏菜</span>
+            </div>
+            <div class="nav-tab" data-cuisine="min" style="--tab-color: var(--min)">
+                <span class="tab-icon">🍲</span>
+                <span>闽菜</span>
+            </div>
+            <div class="nav-tab" data-cuisine="zhe" style="--tab-color: var(--zhe)">
+                <span class="tab-icon">🏞️</span>
+                <span>浙菜</span>
+            </div>
+            <div class="nav-tab" data-cuisine="xiang" style="--tab-color: var(--xiang)">
+                <span class="tab-icon">🔥</span>
+                <span>湘菜</span>
+            </div>
+            <div class="nav-tab" data-cuisine="hui" style="--tab-color: var(--hui)">
+                <span class="tab-icon">⛰️</span>
+                <span>徽菜</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Overview Section -->
+    <section class="cuisine-section active" id="section-overview">
+        <div class="overview-section">
+            <h2>八大菜系总览</h2>
+            <p style="text-align:center; color:#888; margin-bottom: 2.5rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+                中国菜肴在烹饪中有许多流派，其中最有影响和代表性的，被社会公认的有八大菜系。点击卡片可查看详细介绍。
+            </p>
+            <div class="overview-grid">
+                <div class="overview-card" data-target="lu" style="--card-color: var(--lu)">
+                    <div class="card-icon">🏛️</div>
+                    <h3>鲁菜</h3>
+                    <div class="card-en">Shandong Cuisine</div>
+                    <div class="card-province">📍 山东省</div>
+                    <div class="card-flavor">咸鲜为主 · 醇厚浓郁 · 百菜之母</div>
+                </div>
+                <div class="overview-card" data-target="chuan" style="--card-color: var(--chuan)">
+                    <div class="card-icon">🌶️</div>
+                    <h3>川菜</h3>
+                    <div class="card-en">Sichuan Cuisine</div>
+                    <div class="card-province">📍 四川省 / 重庆市</div>
+                    <div class="card-flavor">麻辣鲜香 · 百菜百味 · 味型丰富</div>
+                </div>
+                <div class="overview-card" data-target="yue" style="--card-color: var(--yue)">
+                    <div class="card-icon">🦐</div>
+                    <h3>粤菜</h3>
+                    <div class="card-en">Cantonese Cuisine</div>
+                    <div class="card-province">📍 广东省</div>
+                    <div class="card-flavor">清淡鲜甜 · 原汁原味 · 食在广州</div>
+                </div>
+                <div class="overview-card" data-target="su" style="--card-color: var(--su)">
+                    <div class="card-icon">🎋</div>
+                    <h3>苏菜</h3>
+                    <div class="card-en">Jiangsu Cuisine</div>
+                    <div class="card-province">📍 江苏省</div>
+                    <div class="card-flavor">咸甜适中 · 刀工精细 · 文人雅韵</div>
+                </div>
+                <div class="overview-card" data-target="min" style="--card-color: var(--min)">
+                    <div class="card-icon">🍲</div>
+                    <h3>闽菜</h3>
+                    <div class="card-en">Fujian Cuisine</div>
+                    <div class="card-province">📍 福建省</div>
+                    <div class="card-flavor">鲜香清淡 · 以汤为魂 · 红糟增色</div>
+                </div>
+                <div class="overview-card" data-target="zhe" style="--card-color: var(--zhe)">
+                    <div class="card-icon">🏞️</div>
+                    <h3>浙菜</h3>
+                    <div class="card-en">Zhejiang Cuisine</div>
+                    <div class="card-province">📍 浙江省</div>
+                    <div class="card-flavor">清鲜爽滑 · 讲究时令 · 人文底蕴</div>
+                </div>
+                <div class="overview-card" data-target="xiang" style="--card-color: var(--xiang)">
+                    <div class="card-icon">🔥</div>
+                    <h3>湘菜</h3>
+                    <div class="card-en">Hunan Cuisine</div>
+                    <div class="card-province">📍 湖南省</div>
+                    <div class="card-flavor">香辣鲜浓 · 酸辣并重 · 纯粹热烈</div>
+                </div>
+                <div class="overview-card" data-target="hui" style="--card-color: var(--hui)">
+                    <div class="card-icon">⛰️</div>
+                    <h3>徽菜</h3>
+                    <div class="card-en">Anhui Cuisine</div>
+                    <div class="card-province">📍 安徽省</div>
+                    <div class="card-flavor">咸鲜醇厚 · 善用山珍 · 火工独到</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lu Cuisine -->
+    <section class="cuisine-section" id="section-lu" style="--cuisine-color: var(--lu)">
+        <div class="main-content">
+            <div class="cuisine-header">
+                <h2>鲁菜</h2>
+                <div class="subtitle">Shandong Cuisine · Lu</div>
+                <div class="province">📍 山东省</div>
+            </div>
+
+            <div class="description-section">
+                鲁菜是中国历史最悠久、影响最广泛的菜系，发源于齐鲁大地，以孔府菜为代表。口味咸鲜醇厚，烹调技法多样，尤擅清汤与奶汤的调制，食材多取自黄河与渤海的优质海鲜及畜产。作为宫廷菜的主要来源，鲁菜在中国饮食文化史上占据举足轻重的地位。
+            </div>
+
+            <div class="characteristics">
+                <div class="char-card">
+                    <h4>风味特色</h4>
+                    <p>咸鲜为主，醇厚浓郁，少辣。善用葱蒜提味，注重汤底，被誉为「百菜之母」，是八大菜系之首。</p>
+                </div>
+                <div class="char-card">
+                    <h4>烹饪技法</h4>
+                    <div class="tech-tags">
+                        <span class="tech-tag">爆炒</span>
+                        <span class="tech-tag">扒烧</span>
+                        <span class="tech-tag">熘</span>
+                        <span class="tech-tag">蒸</span>
+                        <span class="tech-tag">烤</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dishes-section">
+                <h3>代表菜品</h3>
+                <div class="dishes-grid">
+                    <div class="dish-card"><div class="dish-number">01</div><div class="dish-name">九转大肠</div><div class="dish-name-en">Nine-Turn Large Intestine</div></div>
+                    <div class="dish-card"><div class="dish-number">02</div><div class="dish-name">糖醋鲤鱼</div><div class="dish-name-en">Sweet and Sour Carp</div></div>
+                    <div class="dish-card"><div class="dish-number">03</div><div class="dish-name">德州扒鸡</div><div class="dish-name-en">Dezhou Braised Chicken</div></div>
+                    <div class="dish-card"><div class="dish-number">04</div><div class="dish-name">葱烧海参</div><div class="dish-name-en">Sea Cucumber Braised with Scallions</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chuan Cuisine -->
+    <section class="cuisine-section" id="section-chuan" style="--cuisine-color: var(--chuan)">
+        <div class="main-content">
+            <div class="cuisine-header">
+                <h2>川菜</h2>
+                <div class="subtitle">Sichuan Cuisine · Chuan</div>
+                <div class="province">📍 四川省 / 重庆市</div>
+            </div>
+
+            <div class="description-section">
+                川菜以「麻、辣、鲜、香」闻名天下，是当今中国流传最广的菜系之一。四川盆地潮湿多雾的气候造就了当地人嗜辣的饮食习惯，花椒的麻与辣椒的辣相互交织，形成独特的复合味觉体验。川菜不仅仅是辣，其味型多达二十余种，清淡与浓烈并存，展现出极高的烹饪艺术。
+            </div>
+
+            <div class="characteristics">
+                <div class="char-card">
+                    <h4>风味特色</h4>
+                    <p>麻辣鲜香，复合味型多变，一菜一格，百菜百味。善用花椒、豆瓣酱、辣椒，以「麻辣」著称，味型多达24种。</p>
+                </div>
+                <div class="char-card">
+                    <h4>烹饪技法</h4>
+                    <div class="tech-tags">
+                        <span class="tech-tag">炒</span>
+                        <span class="tech-tag">烧</span>
+                        <span class="tech-tag">炖</span>
+                        <span class="tech-tag">腌</span>
+                        <span class="tech-tag">熏</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dishes-section">
+                <h3>代表菜品</h3>
+                <div class="dishes-grid">
+                    <div class="dish-card"><div class="dish-number">01</div><div class="dish-name">麻婆豆腐</div><div class="dish-name-en">Mapo Tofu</div></div>
+                    <div class="dish-card"><div class="dish-number">02</div><div class="dish-name">夫妻肺片</div><div class="dish-name-en">Husband and Wife Beef Slices</div></div>
+                    <div class="dish-card"><div class="dish-number">03</div><div class="dish-name">回锅肉</div><div class="dish-name-en">Twice-Cooked Pork</div></div>
+                    <div class="dish-card"><div class="dish-number">04</div><div class="dish-name">水煮鱼</div><div class="dish-name-en">Boiled Fish in Spicy Broth</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Yue Cuisine -->
+    <section class="cuisine-section" id="section-yue" style="--cuisine-color: var(--yue)">
+        <div class="main-content">
+            <div class="cuisine-header">
+                <h2>粤菜</h2>
+                <div class="subtitle">Cantonese Cuisine · Yue</div>
+                <div class="province">📍 广东省</div>
+            </div>
+
+            <div class="description-section">
+                粤菜发源于广东，以「食在广州」的美誉享誉海内外，是海外华人社区最具代表性的中国菜系。粤菜追求食材的本味，烹调手法轻盈，以清蒸、白灼最能体现其精髓。点心文化（饮茶）是粤菜的重要组成部分，种类繁多的精致小点展现了粤菜师傅的精湛技艺。
+            </div>
+
+            <div class="characteristics">
+                <div class="char-card">
+                    <h4>风味特色</h4>
+                    <p>清淡鲜甜，原汁原味，少油少盐。食材广博，讲究「镬气」，善用时令食材，以点心（饮茶）文化闻名。</p>
+                </div>
+                <div class="char-card">
+                    <h4>烹饪技法</h4>
+                    <div class="tech-tags">
+                        <span class="tech-tag">蒸</span>
+                        <span class="tech-tag">炒</span>
+                        <span class="tech-tag">焗</span>
+                        <span class="tech-tag">烩</span>
+                        <span class="tech-tag">煲</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dishes-section">
+                <h3>代表菜品</h3>
+                <div class="dishes-grid">
+                    <div class="dish-card"><div class="dish-number">01</div><div class="dish-name">白切鸡</div><div class="dish-name-en">White Cut Chicken</div></div>
+                    <div class="dish-card"><div class="dish-number">02</div><div class="dish-name">烧鹅</div><div class="dish-name-en">Roasted Goose</div></div>
+                    <div class="dish-card"><div class="dish-number">03</div><div class="dish-name">虾饺</div><div class="dish-name-en">Har Gow (Shrimp Dumplings)</div></div>
+                    <div class="dish-card"><div class="dish-number">04</div><div class="dish-name">清蒸石斑鱼</div><div class="dish-name-en">Steamed Grouper</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Su Cuisine -->
+    <section class="cuisine-section" id="section-su" style="--cuisine-color: var(--su)">
+        <div class="main-content">
+            <div class="cuisine-header">
+                <h2>苏菜</h2>
+                <div class="subtitle">Jiangsu Cuisine · Su</div>
+                <div class="province">📍 江苏省</div>
+            </div>
+
+            <div class="description-section">
+                苏菜（淮扬菜为代表）是国宴的主要组成菜系，以精致的刀工和优雅的造型著称，被誉为「文人菜」。江苏地处长三角水网密布之地，鱼虾蟹螺等河鲜食材丰富，烹调注重保留食材的鲜嫩本味，口感细腻柔和。苏菜的美不仅在味道，更在于其如苏州园林般精雕细琢的摆盘艺术。
+            </div>
+
+            <div class="characteristics">
+                <div class="char-card">
+                    <h4>风味特色</h4>
+                    <p>咸甜适中，浓而不腻，清鲜平和。讲究刀工精细，造型美观，四季分明，善烹河鲜与湖鲜。</p>
+                </div>
+                <div class="char-card">
+                    <h4>烹饪技法</h4>
+                    <div class="tech-tags">
+                        <span class="tech-tag">炖</span>
+                        <span class="tech-tag">焖</span>
+                        <span class="tech-tag">煨</span>
+                        <span class="tech-tag">蒸</span>
+                        <span class="tech-tag">扣</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dishes-section">
+                <h3>代表菜品</h3>
+                <div class="dishes-grid">
+                    <div class="dish-card"><div class="dish-number">01</div><div class="dish-name">松鼠桂鱼</div><div class="dish-name-en">Squirrel-Shaped Mandarin Fish</div></div>
+                    <div class="dish-card"><div class="dish-number">02</div><div class="dish-name">清炖蟹粉狮子头</div><div class="dish-name-en">Crab Roe Lion's Head Meatball</div></div>
+                    <div class="dish-card"><div class="dish-number">03</div><div class="dish-name">叫花鸡</div><div class="dish-name-en">Beggar's Chicken</div></div>
+                    <div class="dish-card"><div class="dish-number">04</div><div class="dish-name">大煮干丝</div><div class="dish-name-en">Braised Tofu Shreds</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Min Cuisine -->
+    <section class="cuisine-section" id="section-min" style="--cuisine-color: var(--min)">
+        <div class="main-content">
+            <div class="cuisine-header">
+                <h2>闽菜</h2>
+                <div class="subtitle">Fujian Cuisine · Min</div>
+                <div class="province">📍 福建省</div>
+            </div>
+
+            <div class="description-section">
+                闽菜以「无汤不成席」著称，汤菜是其最大特色，以精工细作的汤底烘托食材的鲜美。佛跳墙集山珍海味于一炉，是闽菜的巅峰之作，代表了极致的烹饪工艺。闽菜深受海洋文化影响，善用海产，并通过海上丝绸之路传播至东南亚，对闽南、台湾及海外华人料理影响深远。
+            </div>
+
+            <div class="characteristics">
+                <div class="char-card">
+                    <h4>风味特色</h4>
+                    <p>鲜香清淡，偏甜微酸，善用汤羹。以「汤」为灵魂，善用红糟、沙茶等特色调料，刀工精妙，注重火候。</p>
+                </div>
+                <div class="char-card">
+                    <h4>烹饪技法</h4>
+                    <div class="tech-tags">
+                        <span class="tech-tag">炒</span>
+                        <span class="tech-tag">蒸</span>
+                        <span class="tech-tag">煨</span>
+                        <span class="tech-tag">炸</span>
+                        <span class="tech-tag">糟</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dishes-section">
+                <h3>代表菜品</h3>
+                <div class="dishes-grid">
+                    <div class="dish-card"><div class="dish-number">01</div><div class="dish-name">佛跳墙</div><div class="dish-name-en">Buddha Jumps Over the Wall</div></div>
+                    <div class="dish-card"><div class="dish-number">02</div><div class="dish-name">荔枝肉</div><div class="dish-name-en">Lychee Pork</div></div>
+                    <div class="dish-card"><div class="dish-number">03</div><div class="dish-name">沙茶面</div><div class="dish-name-en">Satay Noodle Soup</div></div>
+                    <div class="dish-card"><div class="dish-number">04</div><div class="dish-name">醉糟鸡</div><div class="dish-name-en">Red-Yeast Rice Marinated Chicken</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Zhe Cuisine -->
+    <section class="cuisine-section" id="section-zhe" style="--cuisine-color: var(--zhe)">
+        <div class="main-content">
+            <div class="cuisine-header">
+                <h2>浙菜</h2>
+                <div class="subtitle">Zhejiang Cuisine · Zhe</div>
+                <div class="province">📍 浙江省</div>
+            </div>
+
+            <div class="description-section">
+                浙菜以杭帮菜为代表，得益于「上有天堂，下有苏杭」的富饶物产，烹调细腻清雅，色香味俱佳。东坡肉、龙井虾仁等名菜背后均有动人的文化故事，体现了浙菜深厚的人文底蕴。浙菜崇尚自然之鲜，食材多取自西湖、钱塘江及东海，以时令新鲜为最高准则。
+            </div>
+
+            <div class="characteristics">
+                <div class="char-card">
+                    <h4>风味特色</h4>
+                    <p>清鲜爽滑，鲜嫩软糯，淡而有味。取材讲究鲜活，注重时令，杭州菜、宁波菜、绍兴菜各具特色。</p>
+                </div>
+                <div class="char-card">
+                    <h4>烹饪技法</h4>
+                    <div class="tech-tags">
+                        <span class="tech-tag">炒</span>
+                        <span class="tech-tag">炸</span>
+                        <span class="tech-tag">烩</span>
+                        <span class="tech-tag">蒸</span>
+                        <span class="tech-tag">腌</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dishes-section">
+                <h3>代表菜品</h3>
+                <div class="dishes-grid">
+                    <div class="dish-card"><div class="dish-number">01</div><div class="dish-name">西湖醋鱼</div><div class="dish-name-en">West Lake Fish in Vinegar Sauce</div></div>
+                    <div class="dish-card"><div class="dish-number">02</div><div class="dish-name">东坡肉</div><div class="dish-name-en">Dongpo Braised Pork Belly</div></div>
+                    <div class="dish-card"><div class="dish-number">03</div><div class="dish-name">龙井虾仁</div><div class="dish-name-en">Shrimp with Longjing Tea</div></div>
+                    <div class="dish-card"><div class="dish-number">04</div><div class="dish-name">宋嫂鱼羹</div><div class="dish-name-en">Sister Song's Fish Chowder</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Xiang Cuisine -->
+    <section class="cuisine-section" id="section-xiang" style="--cuisine-color: var(--xiang)">
+        <div class="main-content">
+            <div class="cuisine-header">
+                <h2>湘菜</h2>
+                <div class="subtitle">Hunan Cuisine · Xiang</div>
+                <div class="province">📍 湖南省</div>
+            </div>
+
+            <div class="description-section">
+                湘菜以香辣著称，与川菜之麻辣有所不同——湘菜的辣直接、纯粹、热烈，不依赖花椒，而是以新鲜辣椒、剁辣椒和干辣椒呈现层次丰富的辣味。湖南多山地丘陵，腌腊熏制的保存技艺孕育了湘西腊肉等独特风味。毛泽东的故乡情结使湘菜享有独特的历史文化加成，「毛氏红烧肉」更成为举国皆知的招牌名菜。
+            </div>
+
+            <div class="characteristics">
+                <div class="char-card">
+                    <h4>风味特色</h4>
+                    <p>香辣鲜浓，酸辣并重，油重色浓。以「辣」为魂，辣而不麻，善用腊制品与烟熏，香气浓郁，色泽红艳。</p>
+                </div>
+                <div class="char-card">
+                    <h4>烹饪技法</h4>
+                    <div class="tech-tags">
+                        <span class="tech-tag">炒</span>
+                        <span class="tech-tag">熏</span>
+                        <span class="tech-tag">腊</span>
+                        <span class="tech-tag">蒸</span>
+                        <span class="tech-tag">煨</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dishes-section">
+                <h3>代表菜品</h3>
+                <div class="dishes-grid">
+                    <div class="dish-card"><div class="dish-number">01</div><div class="dish-name">剁椒鱼头</div><div class="dish-name-en">Steamed Fish Head with Chopped Chili</div></div>
+                    <div class="dish-card"><div class="dish-number">02</div><div class="dish-name">毛氏红烧肉</div><div class="dish-name-en">Chairman Mao's Red-Braised Pork</div></div>
+                    <div class="dish-card"><div class="dish-number">03</div><div class="dish-name">湘西腊肉</div><div class="dish-name-en">Western Hunan Cured Bacon</div></div>
+                    <div class="dish-card"><div class="dish-number">04</div><div class="dish-name">口味虾</div><div class="dish-name-en">Spicy Crayfish</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hui Cuisine -->
+    <section class="cuisine-section" id="section-hui" style="--cuisine-color: var(--hui)">
+        <div class="main-content">
+            <div class="cuisine-header">
+                <h2>徽菜</h2>
+                <div class="subtitle">Anhui Cuisine · Hui</div>
+                <div class="province">📍 安徽省</div>
+            </div>
+
+            <div class="description-section">
+                徽菜发源于古徽州（今安徽南部），与徽商的兴衰紧密相连，曾随徽商脚步流传大江南北。徽菜善用皖南山区的笋、蕨、菌等山珍，以及新安江流域的鲜鱼，烹调讲究火候，炖焖工夫深厚。臭鳜鱼是徽菜最具代表性的符号——经过特殊腌制发酵后，散发独特香气，令初尝者意外、回味者着迷。
+            </div>
+
+            <div class="characteristics">
+                <div class="char-card">
+                    <h4>风味特色</h4>
+                    <p>咸鲜醇厚，重油重色，味道浓郁。善用山珍野味与河鲜，注重火工，讲究「原汁原味」，红烧与清炖并重。</p>
+                </div>
+                <div class="char-card">
+                    <h4>烹饪技法</h4>
+                    <div class="tech-tags">
+                        <span class="tech-tag">炖</span>
+                        <span class="tech-tag">焖</span>
+                        <span class="tech-tag">烧</span>
+                        <span class="tech-tag">蒸</span>
+                        <span class="tech-tag">熏</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dishes-section">
+                <h3>代表菜品</h3>
+                <div class="dishes-grid">
+                    <div class="dish-card"><div class="dish-number">01</div><div class="dish-name">臭鳜鱼</div><div class="dish-name-en">Fermented Mandarin Fish</div></div>
+                    <div class="dish-card"><div class="dish-number">02</div><div class="dish-name">红烧划水</div><div class="dish-name-en">Red-Braised Grass Carp Tail</div></div>
+                    <div class="dish-card"><div class="dish-number">03</div><div class="dish-name">毛豆腐</div><div class="dish-name-en">Furry Tofu</div></div>
+                    <div class="dish-card"><div class="dish-number">04</div><div class="dish-name">黄山炖鸽</div><div class="dish-name-en">Huangshan Stewed Pigeon</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>中国八大菜系交互式图文介绍 · 多Agent协同创作</p>
+        <p style="margin-top: 0.5rem;">数据来源：中国烹饪协会 · 2026</p>
+    </footer>
+
+    <!-- Back to Top -->
+    <div class="back-to-top" id="backToTop" onclick="scrollToTop()">
+        <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+    </div>
+
+    <script>
+        // Data
+        const cuisines = ['overview', 'lu', 'chuan', 'yue', 'su', 'min', 'zhe', 'xiang', 'hui'];
+
+        // Tab Navigation
+        const navTabs = document.querySelectorAll('.nav-tab');
+        const sections = document.querySelectorAll('.cuisine-section');
+
+        function switchCuisine(cuisineId) {
+            navTabs.forEach(tab => tab.classList.remove('active'));
+            sections.forEach(section => section.classList.remove('active'));
+
+            const targetTab = document.querySelector(`[data-cuisine="${cuisineId}"]`);
+            const targetSection = document.getElementById(`section-${cuisineId}`);
+
+            if (targetTab) targetTab.classList.add('active');
+            if (targetSection) {
+                targetSection.classList.add('active');
+                targetSection.style.animation = 'none';
+                targetSection.offsetHeight;
+                targetSection.style.animation = 'fadeIn 0.5s ease';
+            }
+
+            window.scrollTo({ top: document.getElementById('navSection').offsetTop, behavior: 'smooth' });
+        }
+
+        navTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                switchCuisine(tab.dataset.cuisine);
+            });
+        });
+
+        // Overview cards click
+        document.querySelectorAll('.overview-card').forEach(card => {
+            card.addEventListener('click', () => {
+                switchCuisine(card.dataset.target);
+            });
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            const currentIndex = cuisines.indexOf(
+                document.querySelector('.nav-tab.active').dataset.cuisine
+            );
+
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nextIndex = (currentIndex + 1) % cuisines.length;
+                switchCuisine(cuisines[nextIndex]);
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prevIndex = (currentIndex - 1 + cuisines.length) % cuisines.length;
+                switchCuisine(cuisines[prevIndex]);
+            }
+        });
+
+        // Scroll to content
+        function scrollToContent() {
+            document.getElementById('navSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Back to top
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.addEventListener('scroll', () => {
+            const backToTop = document.getElementById('backToTop');
+            if (window.scrollY > 500) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+
+            // Progress bar
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        });
+
+        // Dish card hover animation
+        document.querySelectorAll('.dish-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px) scale(1.02)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+
+        // Touch swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) < 50) return;
+
+            const currentIndex = cuisines.indexOf(
+                document.querySelector('.nav-tab.active').dataset.cuisine
+            );
+
+            if (diff > 0) {
+                const nextIndex = (currentIndex + 1) % cuisines.length;
+                switchCuisine(cuisines[nextIndex]);
+            } else {
+                const prevIndex = (currentIndex - 1 + cuisines.length) % cuisines.length;
+                switchCuisine(cuisines[prevIndex]);
+            }
+        }
+
+        // Intersection Observer for nav highlight
+        const heroEl = document.getElementById('hero');
+        const navSection = document.getElementById('navSection');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) {
+                    navSection.style.boxShadow = '0 2px 20px rgba(0,0,0,0.3)';
+                } else {
+                    navSection.style.boxShadow = 'none';
+                }
+            });
+        }, { threshold: 0 });
+
+        observer.observe(heroEl);
+    </script>
+</body>
+</html>
